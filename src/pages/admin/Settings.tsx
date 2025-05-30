@@ -29,7 +29,7 @@ interface StoreSettings {
 
 const Settings: React.FC = () => {
   const [settings, setSettings] = useState<StoreSettings>({
-    storeName: 'Book Store',
+    storeName: 'Subhman.Store',
     email: 'contact@bookstore.com',
     phone: '+1 234 567 8900',
     address: '123 Main St',

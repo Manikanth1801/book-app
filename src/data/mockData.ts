@@ -1,139 +1,477 @@
-export interface Book {
-  id: string;
-  title: string;
-  author: string;
-  isbn: string;
-  price: number;
-  salePrice?: number;
-  stock: number;
-  category: string;
-  coverImage: string;
-  description: string;
-  rating: number;
-  reviews: Review[];
-  inStock: boolean;
-}
+import { Book, Customer, Order, OrderItem, Review, Sale } from "../types/mockTypes";
 
-export interface Review {
-  id: string;
-  userId: string;
-  rating: number;
-  comment: string;
-  date: string;
-}
-
-export interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  orders: Order[];
-  createdAt: string;
-}
-
-export interface Order {
-  id: string;
-  customerId: string;
-  items: OrderItem[];
-  total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  shippingAddress: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  paymentMethod: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface OrderItem {
-  bookId: string;
-  quantity: number;
-  price: number;
-  salePrice?: number;
-}
-
-export interface Sale {
-  id: string;
-  name: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  discountPercentage: number;
-  books: string[]; // Array of book IDs
-  theme: 'default' | 'christmas' | 'summer' | 'festival';
-  isActive: boolean;
-}
+// Helper function to get random book images from Unsplash
+export const getRandomBookImage = (index: number) => {
+  const images = [
+    'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&auto=format&fit=crop&q=60',
+    'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500&auto=format&fit=crop&q=60',
+  ];
+  return images[index % images.length];
+};
 
 // Mock data
 export const mockBooks: Book[] = [
   {
-    id: '1',
+    id: 'BK001',
     title: 'The Great Gatsby',
     author: 'F. Scott Fitzgerald',
     isbn: '978-0743273565',
-    price: 15.99,
-    stock: 50,
+    price: 12.99,
+    stock: 15,
     category: 'Fiction',
-    coverImage: 'https://example.com/gatsby.jpg',
-    description: 'A story of the fabulously wealthy Jay Gatsby...',
+    coverImage: getRandomBookImage(0),
+    description: 'A novel about the Roaring Twenties, following the mysterious millionaire Jay Gatsby and his obsession with the beautiful Daisy Buchanan.',
     rating: 4.5,
     reviews: [],
     inStock: true,
+    format: 'Paperback',
   },
-  // Add more mock books...
+  {
+    id: 'BK002',
+    title: 'To Kill a Mockingbird',
+    author: 'Harper Lee',
+    isbn: '978-0061120084',
+    price: 10.99,
+    stock: 8,
+    category: 'Fiction',
+    coverImage: getRandomBookImage(1),
+    description: 'A story of racial injustice in the South, told through the eyes of young Scout Finch.',
+    rating: 4.7,
+    reviews: [],
+    inStock: true,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK003',
+    title: '1984',
+    author: 'George Orwell',
+    isbn: '978-0451524935',
+    price: 9.99,
+    stock: 20,
+    category: 'Science Fiction',
+    coverImage: getRandomBookImage(2),
+    description: 'A dystopian social science fiction novel set in a totalitarian society.',
+    rating: 4.6,
+    reviews: [],
+    inStock: true,
+    format: 'eBook',
+  },
+  {
+    id: 'BK004',
+    title: 'Pride and Prejudice',
+    author: 'Jane Austen',
+    isbn: '978-0141439518',
+    price: 8.99,
+    stock: 12,
+    category: 'Romance',
+    coverImage: getRandomBookImage(3),
+    description: 'A classic novel of manners following the spirited Elizabeth Bennet.',
+    rating: 4.5,
+    reviews: [],
+    inStock: true,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK005',
+    title: 'The Hobbit',
+    author: 'J.R.R. Tolkien',
+    isbn: '978-0547928227',
+    price: 14.99,
+    stock: 10,
+    category: 'Fantasy',
+    coverImage: getRandomBookImage(4),
+    description: 'A fantasy novel about the adventures of Bilbo Baggins.',
+    rating: 4.8,
+    reviews: [],
+    inStock: true,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK006',
+    title: 'The Alchemist',
+    author: 'Paulo Coelho',
+    isbn: '978-0062315007',
+    price: 11.99,
+    stock: 18,
+    category: 'Fiction',
+    coverImage: getRandomBookImage(5),
+    description: 'A philosophical novel about a young shepherd named Santiago.',
+    rating: 4.4,
+    reviews: [],
+    inStock: true,
+    format: 'eBook',
+  },
+  {
+    id: 'BK007',
+    title: 'The Da Vinci Code',
+    author: 'Dan Brown',
+    isbn: '978-0307474278',
+    price: 13.99,
+    stock: 15,
+    category: 'Mystery',
+    coverImage: getRandomBookImage(77),
+    description: 'A mystery thriller novel about a murder in the Louvre Museum.',
+    rating: 4.3,
+    reviews: [],
+    inStock: true,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK008',
+    title: 'The Little Prince',
+    author: 'Antoine de Saint-Exupéry',
+    isbn: '978-0156013987',
+    price: 7.99,
+    stock: 25,
+    category: 'Fiction',
+    coverImage: getRandomBookImage(87),
+    description: 'A poetic tale about a young prince who visits various planets.',
+    rating: 4.7,
+    reviews: [],
+    inStock: true,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK016',
+    title: 'The Midnight Library',
+    author: 'Matt Haig',
+    description: 'A novel about infinite possibilities and the power of choice in life.',
+    price: 16.99,
+    coverImage: getRandomBookImage(0),
+    category: 'Fiction',
+    inStock: true,
+    rating: 4.6,
+    reviews: [],
+    isbn: '978-0525559474',
+    stock: 40,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK017',
+    title: 'Project Hail Mary',
+    author: 'Andy Weir',
+    description: 'A thrilling space adventure about an astronaut who wakes up alone on a spacecraft.',
+    price: 17.99,
+    coverImage: getRandomBookImage(1),
+    category: 'Science Fiction',
+    inStock: true,
+    rating: 4.8,
+    reviews: [],
+    isbn: '978-0593135204',
+    stock: 35,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK018',
+    title: 'The Seven Husbands of Evelyn Hugo',
+    author: 'Taylor Jenkins Reid',
+    description: 'A reclusive Hollywood legend reveals her life story to an unknown journalist.',
+    price: 15.99,
+    coverImage: getRandomBookImage(2),
+    category: 'Fiction',
+    inStock: true,
+    rating: 4.7,
+    reviews: [],
+    isbn: '978-1501161933',
+    stock: 45,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK019',
+    title: 'Klara and the Sun',
+    author: 'Kazuo Ishiguro',
+    description: 'A story about an artificial friend who observes human behavior and questions what it means to love.',
+    price: 14.99,
+    coverImage: getRandomBookImage(3),
+    category: 'Science Fiction',
+    inStock: true,
+    rating: 4.5,
+    reviews: [],
+    isbn: '978-0593318171',
+    stock: 30,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK020',
+    title: 'The Thursday Murder Club',
+    author: 'Richard Osman',
+    description: 'A group of elderly friends meet weekly to solve cold cases, until a real murder occurs.',
+    price: 13.99,
+    coverImage: getRandomBookImage(4),
+    category: 'Mystery',
+    inStock: true,
+    rating: 4.4,
+    reviews: [],
+    isbn: '978-0241988268',
+    stock: 50,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK021',
+    title: 'The Invisible Life of Addie LaRue',
+    author: 'V.E. Schwab',
+    description: 'A young woman makes a Faustian bargain to live forever and is cursed to be forgotten by everyone she meets.',
+    price: 16.99,
+    coverImage: getRandomBookImage(5),
+    category: 'Fantasy',
+    inStock: true,
+    rating: 4.6,
+    reviews: [],
+    isbn: '978-0765387561',
+    stock: 40,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK022',
+    title: 'The Last Thing He Told Me',
+    author: 'Laura Dave',
+    description: "A woman's search for the truth about her husband's disappearance and the daughter he left behind.",
+    price: 15.99,
+    coverImage: getRandomBookImage(6),
+    category: 'Mystery',
+    inStock: true,
+    rating: 4.3,
+    reviews: [],
+    isbn: '978-1501171345',
+    stock: 35,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK023',
+    title: 'The House in the Cerulean Sea',
+    author: 'TJ Klune',
+    description: 'A magical island, a dangerous task, and a burning secret.',
+    price: 14.99,
+    coverImage: getRandomBookImage(7),
+    category: 'Fantasy',
+    inStock: true,
+    rating: 4.7,
+    reviews: [],
+    isbn: '978-1250217288',
+    stock: 45,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK024',
+    title: 'The Push',
+    author: 'Ashley Audrain',
+    description: 'A tense, page-turning psychological drama about the making and breaking of a family.',
+    price: 15.99,
+    coverImage: getRandomBookImage(8),
+    category: 'Fiction',
+    inStock: true,
+    rating: 4.5,
+    reviews: [],
+    isbn: '978-0525657606',
+    stock: 30,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK025',
+    title: 'The Four Winds',
+    author: 'Kristin Hannah',
+    description: 'A story of love, heroism, and hope during the Great Depression.',
+    price: 16.99,
+    coverImage: getRandomBookImage(9),
+    category: 'Historical Fiction',
+    inStock: true,
+    rating: 4.6,
+    reviews: [],
+    isbn: '978-1250178602',
+    stock: 40,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK026',
+    title: 'The Anthropocene Reviewed',
+    author: 'John Green',
+    description: 'A collection of essays about the human-centered planet.',
+    price: 13.99,
+    coverImage: getRandomBookImage(10),
+    category: 'Non-Fiction',
+    inStock: true,
+    rating: 4.8,
+    reviews: [],
+    isbn: '978-0525555216',
+    stock: 35,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK027',
+    title: 'The Code Breaker',
+    author: 'Walter Isaacson',
+    description: 'The story of Jennifer Doudna and the gene-editing revolution.',
+    price: 17.99,
+    coverImage: getRandomBookImage(11),
+    category: 'Non-Fiction',
+    inStock: true,
+    rating: 4.7,
+    reviews: [],
+    isbn: '978-1982115852',
+    stock: 25,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK028',
+    title: 'The Final Girl Support Group',
+    author: 'Grady Hendrix',
+    description: 'A fast-paced thriller about a support group for final girls from horror movies.',
+    price: 15.99,
+    coverImage: getRandomBookImage(12),
+    category: 'Horror',
+    inStock: true,
+    rating: 4.4,
+    reviews: [],
+    isbn: '978-0593201237',
+    stock: 40,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK029',
+    title: 'The Love Hypothesis',
+    author: 'Ali Hazelwood',
+    description: 'A young scientist agrees to a fake dating arrangement with a professor.',
+    price: 14.99,
+    coverImage: getRandomBookImage(13),
+    category: 'Romance',
+    inStock: true,
+    rating: 4.5,
+    reviews: [],
+    isbn: '978-0593336823',
+    stock: 45,
+    format: 'Paperback',
+  },
+  {
+    id: 'BK030',
+    title: 'The Lincoln Highway',
+    author: 'Amor Towles',
+    description: "A story of adventure and self-discovery on America's first transcontinental highway.",
+    price: 16.99,
+    coverImage: getRandomBookImage(14),
+    category: 'Fiction',
+    inStock: true,
+    rating: 4.6,
+    reviews: [],
+    isbn: '978-0735222359',
+    stock: 30,
+    format: 'Paperback',
+  }
+];
+
+export const categories = [
+  {
+    id: 'cat1',
+    name: 'Fiction',
+    description: 'Explore our collection of fiction books',
+    image: getRandomBookImage(17)
+  },
+  {
+    id: 'cat2',
+    name: 'Science Fiction',
+    description: 'Journey through space and time',
+    image: getRandomBookImage(27)
+  },
+  {
+    id: 'cat3',
+    name: 'Romance',
+    description: 'Stories of love and relationships',
+    image: getRandomBookImage(37)
+  },
+  {
+    id: 'cat4',
+    name: 'Fantasy',
+    description: 'Enter magical worlds and epic adventures',
+    image: getRandomBookImage(47)
+  },
+  {
+    id: 'cat5',
+    name: 'Mystery',
+    description: 'Solve intriguing puzzles and crimes',
+    image: getRandomBookImage(57)
+  }
+];
+
+export const features = [
+  {
+    id: 'feat1',
+    title: 'eBooks',
+    description: 'Access your books anywhere with our digital library',
+    icon: '📱'
+  },
+  {
+    id: 'feat2',
+    title: 'Kindle Support',
+    description: 'Read on your Kindle device with our compatible format',
+    icon: '📖'
+  },
+  {
+    id: 'feat3',
+    title: 'Fast Delivery',
+    description: 'Get your physical books delivered within 2-3 business days',
+    icon: '🚚'
+  },
+  {
+    id: 'feat4',
+    title: '24/7 Support',
+    description: 'Our customer service team is always here to help',
+    icon: '💬'
+  }
 ];
 
 export const mockCustomers: Customer[] = [
   {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1234567890',
-    address: {
-      street: '123 Main St',
-      city: 'New York',
-      state: 'NY',
-      zipCode: '10001',
-      country: 'USA',
-    },
+    id: 'CUST001',
+    name: 'Alice Smith',
+    email: 'alice.smith@example.com',
+    phone: '123-456-7890',
+    address: '123 Main St, Anytown, CA 91234',
     orders: [],
-    createdAt: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: 'CUST002',
+    name: 'Bob Johnson',
+    email: 'bob.johnson@example.com',
+    phone: '987-654-3210',
+    address: '456 Oak Ave, Somewhere, TX 75001',
+    orders: [],
   },
   // Add more mock customers...
 ];
 
 export const mockSales: Sale[] = [
   {
-    id: '1',
+    id: 'SALE001',
     name: 'Summer Reading Sale',
-    description: 'Get 20% off on selected books',
-    startDate: '2024-06-01T00:00:00Z',
-    endDate: '2024-08-31T23:59:59Z',
+    description: 'Get great books for your summer vacation!',
+    startDate: '2024-06-01',
+    endDate: '2024-08-31',
     discountPercentage: 20,
-    books: ['1', '2', '3'],
-    theme: 'summer',
+    books: ['BK001', 'BK002'],
+    theme: 'Summer',
     isActive: true,
   },
   {
-    id: '2',
-    name: 'Christmas Special',
-    description: 'Holiday discounts on bestsellers',
-    startDate: '2024-12-01T00:00:00Z',
-    endDate: '2024-12-25T23:59:59Z',
-    discountPercentage: 30,
-    books: ['4', '5', '6'],
-    theme: 'christmas',
+    id: 'SALE002',
+    name: 'Holiday Special',
+    description: 'Perfect gifts for the holiday season.',
+    startDate: '2024-12-01',
+    endDate: '2024-12-31',
+    discountPercentage: 25,
+    books: ['BK003', 'BK004'],
+    theme: 'Christmas',
     isActive: false,
   },
   // Add more mock sales...

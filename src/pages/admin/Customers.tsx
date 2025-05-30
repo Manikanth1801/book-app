@@ -19,12 +19,14 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Grid,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import { Customer, Order } from '../../data/mockData';
+import { Customer, Order, OrderItem } from '../../types/mockTypes';
+import { Address } from '../../types';
 import { mockCustomers } from '../../data/mockData';
 
 const Customers: React.FC = () => {
@@ -55,7 +57,9 @@ const Customers: React.FC = () => {
     }
   };
 
-  const formatAddress = (address: Customer['address']) => {
+  const formatAddress = (address: Address | string | undefined) => {
+    if (!address) return 'No address provided';
+    if (typeof address === 'string') return address;
     return `${address.street}, ${address.city}, ${address.state} ${address.zipCode}, ${address.country}`;
   };
 
@@ -82,10 +86,10 @@ const Customers: React.FC = () => {
               <TableRow key={customer.id}>
                 <TableCell>{customer.name}</TableCell>
                 <TableCell>{customer.email}</TableCell>
-                <TableCell>{customer.phone}</TableCell>
-                <TableCell>{customer.orders.length}</TableCell>
+                <TableCell>{customer.phone || 'N/A'}</TableCell>
+                <TableCell>{customer.orders?.length || 0}</TableCell>
                 <TableCell>
-                  ${customer.orders.reduce((total, order) => total + order.total, 0).toFixed(2)}
+                  ${customer.orders?.reduce((total: number, order: Order) => total + order.total, 0).toFixed(2) || '0.00'}
                 </TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleOpen(customer)}>
@@ -104,13 +108,13 @@ const Customers: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           {selectedCustomer && (
-            <Box sx={{ display: 'grid', gap: 3 }}>
+            <Box sx={{ display: 'grid', gap: 3, mt: 1 }}>
               <Box>
                 <Typography variant="h6">Personal Information</Typography>
                 <Box sx={{ mt: 2 }}>
                   <Typography><strong>Name:</strong> {selectedCustomer.name}</Typography>
                   <Typography><strong>Email:</strong> {selectedCustomer.email}</Typography>
-                  <Typography><strong>Phone:</strong> {selectedCustomer.phone}</Typography>
+                  <Typography><strong>Phone:</strong> {selectedCustomer.phone || 'N/A'}</Typography>
                   <Typography><strong>Address:</strong> {formatAddress(selectedCustomer.address)}</Typography>
                 </Box>
               </Box>
@@ -118,51 +122,55 @@ const Customers: React.FC = () => {
               <Box>
                 <Typography variant="h6">Order History</Typography>
                 <Box sx={{ mt: 2 }}>
-                  {selectedCustomer.orders.map((order) => (
-                    <Accordion key={order.id}>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', pr: 2 }}>
-                          <Typography>
-                            Order #{order.id} - {new Date(order.createdAt).toLocaleDateString()}
-                          </Typography>
-                          <Chip
-                            label={order.status}
-                            color={getOrderStatusColor(order.status)}
-                            size="small"
-                          />
-                        </Box>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Box sx={{ display: 'grid', gap: 2 }}>
-                          <Box>
-                            <Typography variant="subtitle2">Items:</Typography>
-                            {order.items.map((item, index) => (
-                              <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                                <Typography>
-                                  {item.quantity}x Book ID: {item.bookId}
-                                </Typography>
-                                <Typography>
-                                  ${item.salePrice ? item.salePrice : item.price}
-                                </Typography>
-                              </Box>
-                            ))}
+                  {selectedCustomer.orders?.length ? (
+                    selectedCustomer.orders.map((order: Order) => (
+                      <Accordion key={order.id}>
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', pr: 2 }}>
+                            <Typography>
+                              Order #{order.id} - {new Date(order.createdAt).toLocaleDateString()}
+                            </Typography>
+                            <Chip
+                              label={order.status}
+                              color={getOrderStatusColor(order.status)}
+                              size="small"
+                            />
                           </Box>
-                          <Box>
-                            <Typography variant="subtitle2">Shipping Address:</Typography>
-                            <Typography>{formatAddress(order.shippingAddress)}</Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <Box sx={{ display: 'grid', gap: 2 }}>
+                            <Box>
+                              <Typography variant="subtitle2">Items:</Typography>
+                              {order.items.map((item: OrderItem, index: number) => (
+                                <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                                  <Typography>
+                                    {item.quantity}x Book ID: {item.bookId}
+                                  </Typography>
+                                  <Typography>
+                                    ${item.salePrice ? item.salePrice : item.price}
+                                  </Typography>
+                                </Box>
+                              ))}
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2">Shipping Address:</Typography>
+                              <Typography>{formatAddress(order.shippingAddress)}</Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2">Payment Method:</Typography>
+                              <Typography>{order.paymentMethod}</Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="subtitle2">Total:</Typography>
+                              <Typography>${order.total.toFixed(2)}</Typography>
+                            </Box>
                           </Box>
-                          <Box>
-                            <Typography variant="subtitle2">Payment Method:</Typography>
-                            <Typography>{order.paymentMethod}</Typography>
-                          </Box>
-                          <Box>
-                            <Typography variant="subtitle2">Total:</Typography>
-                            <Typography>${order.total.toFixed(2)}</Typography>
-                          </Box>
-                        </Box>
-                      </AccordionDetails>
-                    </Accordion>
-                  ))}
+                        </AccordionDetails>
+                      </Accordion>
+                    ))
+                  ) : (
+                    <Typography color="text.secondary">No orders found</Typography>
+                  )}
                 </Box>
               </Box>
             </Box>

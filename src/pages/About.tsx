@@ -6,7 +6,7 @@ const About: React.FC = () => {
       <h1>About Us</h1>
       <section className="our-story">
         <h2>Our Story</h2>
-        <p>Welcome to our book store, where we bring the joy of reading to everyone.</p>
+        <p>Welcome to our Subhman.Store, where we bring the joy of reading to everyone.</p>
       </section>
       <section className="mission">
         <h2>Our Mission</h2>

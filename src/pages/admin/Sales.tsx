@@ -20,20 +20,27 @@ import {
   Chip,
   FormControlLabel,
   Switch,
+  Grid,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { Sale, Book } from '../../data/mockData';
+import { Sale } from '../../types/mockTypes';
+import { Book } from '../../types';
 import { mockSales, mockBooks } from '../../data/mockData';
 
 const Sales: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>(mockSales);
   const [open, setOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
-  const [formData, setFormData] = useState<Partial<Sale>>({});
+  const [formData, setFormData] = useState<Partial<Sale>>({
+    isActive: true,
+    books: [],
+    discountPercentage: 0,
+    theme: 'default',
+  });
 
   const handleOpen = (sale?: Sale) => {
     if (sale) {
@@ -45,6 +52,7 @@ const Sales: React.FC = () => {
         isActive: true,
         books: [],
         discountPercentage: 0,
+        theme: 'default',
       });
     }
     setOpen(true);
@@ -53,7 +61,12 @@ const Sales: React.FC = () => {
   const handleClose = () => {
     setOpen(false);
     setSelectedSale(null);
-    setFormData({});
+    setFormData({
+      isActive: true,
+      books: [],
+      discountPercentage: 0,
+      theme: 'default',
+    });
   };
 
   const handleSubmit = () => {
@@ -140,103 +153,87 @@ const Sales: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'grid', gap: 2, mt: 1 }}>
-            <Box>
+            <TextField
+              fullWidth
+              label="Sale Name"
+              value={formData.name || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              label="Description"
+              value={formData.description || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
               <TextField
                 fullWidth
-                label="Sale Name"
-                value={formData.name || ''}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                type="date"
+                label="Start Date"
+                value={formData.startDate || ''}
+                onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                InputLabelProps={{ shrink: true }}
               />
-            </Box>
-            <Box>
               <TextField
                 fullWidth
-                multiline
-                rows={2}
-                label="Description"
-                value={formData.description || ''}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                type="date"
+                label="End Date"
+                value={formData.endDate || ''}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                InputLabelProps={{ shrink: true }}
               />
             </Box>
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-              <Box>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="Start Date"
-                  value={formData.startDate || ''}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Box>
-              <Box>
-                <TextField
-                  fullWidth
-                  type="date"
-                  label="End Date"
-                  value={formData.endDate || ''}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Box>
-            </Box>
-            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2 }}>
-              <Box>
-                <TextField
-                  fullWidth
-                  type="number"
-                  label="Discount Percentage"
-                  value={formData.discountPercentage || ''}
-                  onChange={(e) => setFormData({ ...formData, discountPercentage: Number(e.target.value) })}
-                />
-              </Box>
-              <Box>
-                <TextField
-                  fullWidth
-                  select
-                  label="Theme"
-                  value={formData.theme || 'default'}
-                  onChange={(e) => setFormData({ ...formData, theme: e.target.value as Sale['theme'] })}
-                >
-                  <MenuItem value="default">Default</MenuItem>
-                  <MenuItem value="christmas">Christmas</MenuItem>
-                  <MenuItem value="summer">Summer</MenuItem>
-                  <MenuItem value="festival">Festival</MenuItem>
-                </TextField>
-              </Box>
-            </Box>
-            <Box>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Discount Percentage"
+                value={formData.discountPercentage || ''}
+                onChange={(e) => setFormData({ ...formData, discountPercentage: Number(e.target.value) })}
+              />
               <TextField
                 fullWidth
                 select
-                SelectProps={{
-                  multiple: true,
-                  value: formData.books || [],
-                  onChange: (e) => {
-                    const selectedIds = e.target.value as string[];
-                    setFormData({ ...formData, books: selectedIds });
-                  },
-                }}
-                label="Select Books"
+                label="Theme"
+                value={formData.theme || 'default'}
+                onChange={(e) => setFormData({ ...formData, theme: e.target.value as Sale['theme'] })}
               >
-                {mockBooks.map((book) => (
-                  <MenuItem key={book.id} value={book.id}>
-                    {book.title} - ${book.price}
-                  </MenuItem>
-                ))}
+                <MenuItem value="default">Default</MenuItem>
+                <MenuItem value="christmas">Christmas</MenuItem>
+                <MenuItem value="summer">Summer</MenuItem>
+                <MenuItem value="festival">Festival</MenuItem>
               </TextField>
             </Box>
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                  />
-                }
-                label="Active"
-              />
-            </Box>
+            <TextField
+              fullWidth
+              select
+              SelectProps={{
+                multiple: true,
+                value: formData.books || [],
+                onChange: (e) => {
+                  const selectedIds = e.target.value as string[];
+                  setFormData({ ...formData, books: selectedIds });
+                },
+              }}
+              label="Select Books"
+            >
+              {mockBooks.map((book) => (
+                <MenuItem key={book.id} value={book.id}>
+                  {book.title} - ${book.price}
+                </MenuItem>
+              ))}
+            </TextField>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                />
+              }
+              label="Active"
+            />
           </Box>
         </DialogContent>
         <DialogActions>

@@ -30,7 +30,7 @@ const Footer: React.FC = () => {
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' }, gap: 4 }}>
           <Box>
             <Typography variant="h6" gutterBottom>
-              Book Store
+              Subhman.Store
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Your one-stop destination for all your reading needs.
@@ -77,7 +77,7 @@ const Footer: React.FC = () => {
           <Typography variant="body2" color="text.secondary" align="center">
             {'© '}
             {new Date().getFullYear()}
-            {' Book Store. All rights reserved.'}
+            {' Subhman.Store . All rights reserved.'}
           </Typography>
         </Box>
       </Container>

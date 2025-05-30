@@ -17,59 +17,107 @@ import {
   DialogActions,
   TextField,
   MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  SelectChangeEvent
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { Book } from '../../data/mockData';
+import { Book } from '../../types/mockTypes';
 import { mockBooks } from '../../data/mockData';
 
 const Inventory: React.FC = () => {
   const [books, setBooks] = useState<Book[]>(mockBooks);
   const [open, setOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-  const [formData, setFormData] = useState<Partial<Book>>({});
+  const [formData, setFormData] = useState<Book>({
+    id: '',
+    title: '',
+    author: '',
+    isbn: '',
+    price: 0,
+    stock: 0,
+    category: '',
+    format: 'Paperback',
+    inStock: true,
+    coverImage: undefined,
+    description: undefined,
+    rating: undefined,
+    reviews: undefined,
+    salePrice: undefined,
+  });
 
   const handleOpen = (book?: Book) => {
-    if (book) {
-      setSelectedBook(book);
-      setFormData(book);
-    } else {
-      setSelectedBook(null);
-      setFormData({});
-    }
+    setSelectedBook(book || null);
+    setFormData(book || {
+      id: '',
+      title: '',
+      author: '',
+      isbn: '',
+      price: 0,
+      stock: 0,
+      category: '',
+      format: 'Paperback',
+      inStock: true,
+      coverImage: undefined,
+      description: undefined,
+      rating: undefined,
+      reviews: undefined,
+      salePrice: undefined,
+    });
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedBook(null);
-    setFormData({});
+    setFormData({
+      id: '',
+      title: '',
+      author: '',
+      isbn: '',
+      price: 0,
+      stock: 0,
+      category: '',
+      format: 'Paperback',
+      inStock: true,
+      coverImage: undefined,
+      description: undefined,
+      rating: undefined,
+      reviews: undefined,
+      salePrice: undefined,
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    const updatedValue = (name === 'price' || name === 'stock') ? Number(value) : value;
+    setFormData({ ...formData, [name]: updatedValue });
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent<'eBook' | 'Paperback'>) => {
+    const { name, value } = e.target;
+    if (name === 'format') {
+      setFormData({ ...formData, [name]: value as 'eBook' | 'Paperback' });
+    }
   };
 
   const handleSubmit = () => {
     if (selectedBook) {
-      // Update existing book
-      setBooks(books.map(book => 
-        book.id === selectedBook.id ? { ...book, ...formData } : book
-      ));
+      setBooks(books.map((book) => (book.id === selectedBook.id ? formData : book)));
     } else {
-      // Add new book
-      const newBook: Book = {
-        ...formData as Book,
-        id: Date.now().toString(),
-        reviews: [],
-        inStock: true,
-      };
+      const newBook = { ...formData, id: `BK${String(books.length + 1).padStart(3, '0')}` };
       setBooks([...books, newBook]);
     }
     handleClose();
   };
 
   const handleDelete = (id: string) => {
-    setBooks(books.filter(book => book.id !== id));
+    setBooks(books.filter((book) => book.id !== id));
   };
 
   return (
@@ -81,7 +129,7 @@ const Inventory: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={() => handleOpen()}
         >
-          Add Book
+          Add New Book
         </Button>
       </Box>
 
@@ -89,29 +137,31 @@ const Inventory: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>ID</TableCell>
               <TableCell>Title</TableCell>
               <TableCell>Author</TableCell>
-              <TableCell>ISBN</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Format</TableCell>
               <TableCell>Price</TableCell>
               <TableCell>Stock</TableCell>
-              <TableCell>Category</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {books.map((book) => (
               <TableRow key={book.id}>
+                <TableCell>{book.id}</TableCell>
                 <TableCell>{book.title}</TableCell>
                 <TableCell>{book.author}</TableCell>
-                <TableCell>{book.isbn}</TableCell>
+                <TableCell>{book.category}</TableCell>
+                <TableCell>{book.format}</TableCell>
                 <TableCell>${book.price.toFixed(2)}</TableCell>
                 <TableCell>{book.stock}</TableCell>
-                <TableCell>{book.category}</TableCell>
                 <TableCell>
                   <IconButton onClick={() => handleOpen(book)}>
                     <EditIcon />
                   </IconButton>
-                  <IconButton onClick={() => handleDelete(book.id)}>
+                  <IconButton color="error" onClick={() => handleDelete(book.id)}>
                     <DeleteIcon />
                   </IconButton>
                 </TableCell>
@@ -121,85 +171,74 @@ const Inventory: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {selectedBook ? 'Edit Book' : 'Add New Book'}
-        </DialogTitle>
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>{selectedBook ? 'Edit Book' : 'Add New Book'}</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, mt: 1 }}>
-            <Box>
-              <TextField
-                fullWidth
-                label="Title"
-                value={formData.title || ''}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              />
-            </Box>
-            <Box>
-              <TextField
-                fullWidth
-                label="Author"
-                value={formData.author || ''}
-                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              />
-            </Box>
-            <Box>
-              <TextField
-                fullWidth
-                label="ISBN"
-                value={formData.isbn || ''}
-                onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
-              />
-            </Box>
-            <Box>
-              <TextField
-                fullWidth
-                label="Price"
-                type="number"
-                value={formData.price || ''}
-                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-              />
-            </Box>
-            <Box>
-              <TextField
-                fullWidth
-                label="Stock"
-                type="number"
-                value={formData.stock || ''}
-                onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-              />
-            </Box>
-            <Box>
-              <TextField
-                fullWidth
-                select
-                label="Category"
-                value={formData.category || ''}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          <Box sx={{ pt: 2, display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+            <TextField
+              fullWidth
+              label="Title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+            />
+            <TextField
+              fullWidth
+              label="Author"
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+            />
+            <TextField
+              fullWidth
+              label="ISBN"
+              name="isbn"
+              value={formData.isbn}
+              onChange={handleChange}
+            />
+            <TextField
+              fullWidth
+              label="Category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+            />
+            <FormControl fullWidth>
+              <InputLabel id="format-label">Format</InputLabel>
+              <Select
+                labelId="format-label"
+                id="format-select"
+                name="format"
+                value={formData.format}
+                label="Format"
+                onChange={handleSelectChange}
               >
-                <MenuItem value="Fiction">Fiction</MenuItem>
-                <MenuItem value="Non-Fiction">Non-Fiction</MenuItem>
-                <MenuItem value="Science">Science</MenuItem>
-                <MenuItem value="History">History</MenuItem>
-                <MenuItem value="Biography">Biography</MenuItem>
-              </TextField>
-            </Box>
-            <Box sx={{ gridColumn: '1 / -1' }}>
-              <TextField
-                fullWidth
-                multiline
-                rows={4}
-                label="Description"
-                value={formData.description || ''}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </Box>
+                <MenuItem value="eBook">eBook</MenuItem>
+                <MenuItem value="Paperback">Paperback</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              label="Price"
+              name="price"
+              type="number"
+              value={formData.price}
+              onChange={handleChange}
+            />
+            <TextField
+              fullWidth
+              label="Stock"
+              name="stock"
+              type="number"
+              value={formData.stock}
+              onChange={handleChange}
+            />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {selectedBook ? 'Update' : 'Add'}
+          <Button variant="contained" onClick={handleSubmit}>
+            {selectedBook ? 'Save Changes' : 'Add Book'}
           </Button>
         </DialogActions>
       </Dialog>

@@ -112,7 +112,7 @@ const Header: React.FC = () => {
               color: 'inherit',
             }}
           >
-            Book Store
+            Subhman.Store
           </Typography>
 
           {!isMobile && (

@@ -1,100 +1,256 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
   Button,
+  Chip,
+  Rating,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-
-// Mock data for books
-const books = [
-  {
-    id: 'BK001',
-    title: 'The Great Gatsby',
-    author: 'F. Scott Fitzgerald',
-    price: 19.99,
-    stock: 15,
-    category: 'Fiction',
-  },
-  {
-    id: 'BK002',
-    title: 'To Kill a Mockingbird',
-    author: 'Harper Lee',
-    price: 15.99,
-    stock: 8,
-    category: 'Fiction',
-  },
-  {
-    id: 'BK003',
-    title: '1984',
-    author: 'George Orwell',
-    price: 12.99,
-    stock: 20,
-    category: 'Science Fiction',
-  },
-  {
-    id: 'BK004',
-    title: 'Pride and Prejudice',
-    author: 'Jane Austen',
-    price: 14.99,
-    stock: 12,
-    category: 'Romance',
-  },
-];
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Add as AddIcon,
+} from '@mui/icons-material';
+import { Book } from '../../types/mockTypes';
+import { mockBooks } from '../../data/mockData';
 
 const Books: React.FC = () => {
+  const [books, setBooks] = useState<Book[]>(mockBooks);
+  const [open, setOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [formData, setFormData] = useState<Partial<Book>>({
+    title: '',
+    author: '',
+    isbn: '',
+    price: 0,
+    stock: 0,
+    category: '',
+    description: '',
+    format: 'Paperback',
+    inStock: true,
+  });
+
+  const handleOpen = (book?: Book) => {
+    if (book) {
+      setSelectedBook(book);
+      setFormData(book);
+    } else {
+      setSelectedBook(null);
+      setFormData({
+        title: '',
+        author: '',
+        isbn: '',
+        price: 0,
+        stock: 0,
+        category: '',
+        description: '',
+        format: 'Paperback',
+        inStock: true,
+      });
+    }
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setSelectedBook(null);
+    setFormData({
+      title: '',
+      author: '',
+      isbn: '',
+      price: 0,
+      stock: 0,
+      category: '',
+      description: '',
+      format: 'Paperback',
+      inStock: true,
+    });
+  };
+
+  const handleSubmit = () => {
+    if (selectedBook) {
+      // Update existing book
+      setBooks(books.map(book => 
+        book.id === selectedBook.id ? { ...book, ...formData } : book
+      ));
+    } else {
+      // Add new book
+      const newBook: Book = {
+        ...formData as Book,
+        id: `BK${String(books.length + 1).padStart(3, '0')}`,
+        coverImage: '/images/default-book.jpg',
+        rating: 0,
+        reviews: [],
+      };
+      setBooks([...books, newBook]);
+    }
+    handleClose();
+  };
+
+  const handleDelete = (id: string) => {
+    setBooks(books.filter(book => book.id !== id));
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Books</Typography>
-        <Button variant="contained" color="primary">
-          Add New Book
+        <Typography variant="h4">Books Management</Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => handleOpen()}
+        >
+          Add Book
         </Button>
       </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Title</TableCell>
-              <TableCell>Author</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell align="right">Price</TableCell>
-              <TableCell align="right">Stock</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {books.map((book) => (
-              <TableRow key={book.id}>
-                <TableCell>{book.id}</TableCell>
-                <TableCell>{book.title}</TableCell>
-                <TableCell>{book.author}</TableCell>
-                <TableCell>{book.category}</TableCell>
-                <TableCell align="right">${book.price}</TableCell>
-                <TableCell align="right">{book.stock}</TableCell>
-                <TableCell align="center">
-                  <IconButton color="primary" size="small">
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton color="error" size="small">
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+        {books.map((book) => (
+          <Box key={book.id} sx={{ flex: '1 1 300px', minWidth: '300px' }}>
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <CardMedia
+                component="img"
+                height="200"
+                image={book.coverImage}
+                alt={book.title}
+                sx={{ objectFit: 'cover' }}
+              />
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography gutterBottom variant="h6" component="div" noWrap>
+                  {book.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  by {book.author}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <Rating value={book.rating || 0} precision={0.5} readOnly size="small" />
+                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                    ({book.rating || 0})
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                  <Typography variant="h6" color="primary">
+                    ${book.price.toFixed(2)}
+                  </Typography>
+                  <Chip
+                    label={book.format}
+                    size="small"
+                    color={book.format === 'eBook' ? 'secondary' : 'primary'}
+                  />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Stock: {book.stock}
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <IconButton onClick={() => handleOpen(book)} color="primary">
+                  <EditIcon />
+                </IconButton>
+                <IconButton onClick={() => handleDelete(book.id)} color="error">
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
+            </Card>
+          </Box>
+        ))}
+      </Box>
+
+      <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle>
+          {selectedBook ? 'Edit Book' : 'Add New Book'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gap: 2, mt: 1 }}>
+            <TextField
+              fullWidth
+              label="Title"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            />
+            <TextField
+              fullWidth
+              label="Author"
+              value={formData.author}
+              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+            />
+            <TextField
+              fullWidth
+              label="ISBN"
+              value={formData.isbn}
+              onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
+            />
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 2 }}>
+              <TextField
+                fullWidth
+                type="number"
+                label="Price"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+              />
+              <TextField
+                fullWidth
+                type="number"
+                label="Stock"
+                value={formData.stock}
+                onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
+              />
+            </Box>
+            <FormControl fullWidth>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={formData.category}
+                label="Category"
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              >
+                <MenuItem value="Fiction">Fiction</MenuItem>
+                <MenuItem value="Science Fiction">Science Fiction</MenuItem>
+                <MenuItem value="Romance">Romance</MenuItem>
+                <MenuItem value="Fantasy">Fantasy</MenuItem>
+                <MenuItem value="Mystery">Mystery</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel>Format</InputLabel>
+              <Select
+                value={formData.format}
+                label="Format"
+                onChange={(e) => setFormData({ ...formData, format: e.target.value as 'eBook' | 'Paperback' })}
+              >
+                <MenuItem value="Paperback">Paperback</MenuItem>
+                <MenuItem value="eBook">eBook</MenuItem>
+              </Select>
+            </FormControl>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              label="Description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleSubmit} variant="contained">
+            {selectedBook ? 'Update' : 'Add'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

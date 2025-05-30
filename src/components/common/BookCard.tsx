@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
-import { Book } from '../../types';
+import { Book } from '../../types/mockTypes';
 import { addToCart } from '../../store/slices/cartSlice';
 
 interface BookCardProps {
@@ -24,8 +24,8 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     dispatch(addToCart({ book, quantity: 1 }));
   };
 
@@ -49,7 +49,7 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
     >
       <Box sx={{ position: 'relative', paddingTop: '140%' }}>
         <LazyLoadImage
-          src={book.coverImage}
+          src={book.coverImage || '/images/placeholder.jpg'}
           alt={book.title}
           effect="blur"
           style={{
@@ -69,25 +69,26 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
         <Typography variant="body2" color="text.secondary" gutterBottom>
           {book.author}
         </Typography>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          {book.format}
+        </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <Rating value={book.rating} precision={0.5} size="small" readOnly />
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-            ({book.reviews.length})
-          </Typography>
+          {book.reviews && book.reviews.length > 0 && (
+            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+              ({book.reviews.length})
+            </Typography>
+          )}
         </Box>
-        <Box sx={{ mt: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" color="primary">
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+          <Typography variant="h6" color="primary.main">
             ${book.price.toFixed(2)}
           </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={handleAddToCart}
-            disabled={!book.inStock}
-          >
-            {book.inStock ? 'Add to Cart' : 'Out of Stock'}
-          </Button>
+          {book.salePrice && book.price > book.salePrice && (
+            <Typography variant="body2" color="error.main" sx={{ textDecoration: 'line-through' }}>
+              ${book.salePrice.toFixed(2)}
+            </Typography>
+          )}
         </Box>
         {!book.inStock && (
           <Chip
@@ -98,6 +99,16 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
           />
         )}
       </CardContent>
+      <Box sx={{ p: 2 }}>
+        <Button
+          variant="contained"
+          fullWidth
+          onClick={handleAddToCart}
+          disabled={!book.inStock}
+        >
+          {book.inStock ? 'Add to Cart' : 'Out of Stock'}
+        </Button>
+      </Box>
     </Card>
   );
 };

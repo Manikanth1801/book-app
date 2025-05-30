@@ -25,16 +25,20 @@ import {
   LocalOffer,
   Settings,
   Logout,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { useAppDispatch, useAppSelector } from '../../hooks/redux';
 import { logout } from '../../store/slices/authSlice';
 
 const drawerWidth = 240;
+const collapsedDrawerWidth = 60;
 
 const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
@@ -42,6 +46,10 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleSidebarToggle = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   const handleLogout = () => {
@@ -57,12 +65,28 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     { text: 'Settings', icon: <Settings />, path: '/admin/settings' },
   ];
 
-  const drawer = (
-    <Box>
-      <Toolbar sx={{ justifyContent: 'center' }}>
-        <Typography variant="h6" noWrap component="div">
-          Admin Panel
-        </Typography>
+  const currentDrawerWidth = sidebarCollapsed ? collapsedDrawerWidth : drawerWidth;
+
+  const drawerContent = (
+    <Box sx={{ width: currentDrawerWidth, overflowX: 'hidden' }}>
+      <Toolbar
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: sidebarCollapsed ? 'center' : 'flex-end',
+          px: [1],
+        }}
+      >
+        {!sidebarCollapsed && (
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, textAlign: 'center' }}>
+            Admin Panel
+          </Typography>
+        )}
+        {!isMobile && (
+          <IconButton onClick={handleSidebarToggle}>
+            {sidebarCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        )}
       </Toolbar>
       <Divider />
       <List>
@@ -74,9 +98,22 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 navigate(item.path);
                 if (isMobile) setMobileOpen(false);
               }}
+              sx={{
+                minHeight: 48,
+                justifyContent: sidebarCollapsed ? 'center' : 'initial',
+                px: 2.5,
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: sidebarCollapsed ? 0 : 3,
+                  justifyContent: 'center',
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+              {!sidebarCollapsed && <ListItemText primary={item.text} />}
             </ListItemButton>
           </ListItem>
         ))}
@@ -84,9 +121,23 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <Divider />
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={handleLogout}>
-            <ListItemIcon><Logout /></ListItemIcon>
-            <ListItemText primary="Logout" />
+          <ListItemButton onClick={handleLogout}
+            sx={{
+              minHeight: 48,
+              justifyContent: sidebarCollapsed ? 'center' : 'initial',
+              px: 2.5,
+            }}
+          >
+            <ListItemIcon
+              sx={{
+                minWidth: 0,
+                mr: sidebarCollapsed ? 0 : 3,
+                justifyContent: 'center',
+              }}
+            >
+              <Logout />
+            </ListItemIcon>
+            {!sidebarCollapsed && <ListItemText primary="Logout" />}
           </ListItemButton>
         </ListItem>
       </List>
@@ -98,8 +149,12 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       <AppBar
         position="fixed"
         sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
+          width: { md: `calc(100% - ${currentDrawerWidth}px)` },
+          ml: { md: `${currentDrawerWidth}px` },
+          transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
         }}
       >
         <Toolbar>
@@ -125,7 +180,10 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       </AppBar>
       <Box
         component="nav"
-        sx={{ width: { md: drawerWidth }, flexShrink: { md: 0 } }}
+        sx={{
+          width: { md: currentDrawerWidth },
+          flexShrink: { md: 0 },
+        }}
       >
         {isMobile ? (
           <Drawer
@@ -140,18 +198,18 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
             }}
           >
-            {drawer}
+            {drawerContent}
           </Drawer>
         ) : (
           <Drawer
             variant="permanent"
             sx={{
               display: { xs: 'none', md: 'block' },
-              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: currentDrawerWidth },
             }}
             open
           >
-            {drawer}
+            {drawerContent}
           </Drawer>
         )}
       </Box>
@@ -160,11 +218,19 @@ const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { md: `calc(100% - ${drawerWidth}px)` },
           mt: '64px',
+          ml: { sm: `${currentDrawerWidth}px` },
+          width: { sm: `calc(100% - ${currentDrawerWidth}px)` },
+          overflowY: 'auto',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
         }}
       >
-        {children}
+        <Toolbar />
+        <Box sx={{ width: '100%', maxWidth: 1200 }}>
+           {children}
+        </Box>
       </Box>
     </Box>
   );
