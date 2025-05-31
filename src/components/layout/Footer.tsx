@@ -78,7 +78,7 @@ const Footer: React.FC = () => {
           <Typography variant="body2" color="text.secondary" align="center" sx={{ color: '#666' }}>
             {'© '}
             {new Date().getFullYear()}
-            {' Subhman.Store . All rights reserved.'}
+            {' Subhman.Store from Dev-evelopers. All rights reserved.'}
           </Typography>
         </Box>
       </Container>

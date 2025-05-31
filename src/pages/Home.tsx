@@ -16,6 +16,8 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/slices/cartSlice';
 import { Snackbar, Alert, IconButton } from '@mui/material';
 import { ShoppingCart as ShoppingCartIcon } from '@mui/icons-material';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import BookCard from '../components/common/BookCard';
 
 const Home: React.FC = () => {
   const theme = useTheme();
@@ -23,6 +25,7 @@ const Home: React.FC = () => {
   const dispatch = useDispatch();
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState('');
+  const [loading, setLoading] = React.useState(true);
 
   const handleAddToCart = (book: any) => {
     const cartItem = {
@@ -45,6 +48,16 @@ const Home: React.FC = () => {
     setSnackbarMessage(`"${book.title}" added to cart!`);
     setSnackbarOpen(true);
   };
+
+  React.useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 1000); // Simulate loading
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Box>
@@ -155,74 +168,7 @@ const Home: React.FC = () => {
           }}
         >
           {books.slice(0, 8).map((book) => (
-            <Card
-              key={book.id}
-              component={RouterLink}
-              to={`/books/${book.id}`}
-              sx={{
-                textDecoration: 'none',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                borderRadius: 4,
-                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-              }}
-            >
-              <CardMedia
-                component="img"
-                height="300"
-                image={book.image}
-                alt={book.title}
-                sx={{
-                  objectFit: 'cover',
-                  borderTopLeftRadius: 4,
-                  borderTopRightRadius: 4,
-                }}
-              />
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography
-                  gutterBottom
-                  variant="h6"
-                  component="div"
-                  sx={{
-                    fontWeight: 700,
-                    color: 'text.primary',
-                    mb: 1,
-                  }}
-                >
-                  {book.title}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ mb: 1 }}
-                >
-                  {book.author}
-                </Typography>
-                <Typography
-                  variant="h6"
-                  color="error"
-                  sx={{ fontWeight: 700, mb: 2 }}
-                >
-                  ${book.price.toFixed(2)}
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="small"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleAddToCart(book);
-                    }}
-                    disabled={!book.inStock}
-                    startIcon={<ShoppingCartIcon />}
-                  >
-                    {book.inStock ? 'Add to Cart' : 'Out of Stock'}
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
+            <BookCard key={book.id} book={book} />
           ))}
         </Box>
         <Box sx={{ textAlign: 'center', mt: 5 }}>
@@ -267,7 +213,7 @@ const Home: React.FC = () => {
               <Card
                 key={category}
                 component={RouterLink}
-                to={`/categories/${category.toLowerCase()}`}
+                to={`/category/${category}`}
                 sx={{
                   textDecoration: 'none',
                   height: 200,

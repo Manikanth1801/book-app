@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Box,
   Typography,
@@ -31,30 +31,9 @@ import {
 } from '@mui/icons-material';
 import { books } from '../data/books';
 import { addToCart } from '../store/slices/cartSlice';
-
-const mockReviews = [
-  {
-    id: '1',
-    userName: 'Alice Johnson',
-    rating: 5,
-    comment: 'Absolutely loved this book! The characters were well-developed and the plot was engaging.',
-    createdAt: '2024-05-15',
-  },
-  {
-    id: '2',
-    userName: 'Bob Smith',
-    rating: 4,
-    comment: 'Great read, though it started a bit slow. Overall very enjoyable.',
-    createdAt: '2024-05-10',
-  },
-  {
-    id: '3',
-    userName: 'Carol Davis',
-    rating: 5,
-    comment: 'One of the best books I have read this year. Highly recommend!',
-    createdAt: '2024-05-05',
-  },
-];
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import { RootState } from '../store';
+import { addReview } from '../store/slices/reviewSlice';
 
 const BookDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -64,9 +43,22 @@ const BookDetail: React.FC = () => {
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const book = books.find(b => b.id === id);
   const relatedBooks = books.filter(b => b.category === book?.category && b.id !== id).slice(0, 4);
+  const reviews = useSelector((state: RootState) => (id ? state.reviews[id] : [])) || [];
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 1000); // Simulate loading
+    return () => clearTimeout(timer);
+  }, [id]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   if (!book) {
     return (
@@ -104,8 +96,23 @@ const BookDetail: React.FC = () => {
   };
 
   const handleSubmitReview = () => {
+    if (!user) {
+      setSnackbarMessage('You must be logged in to submit a review.');
+      setSnackbarOpen(true);
+      return;
+    }
     if (newReview.comment.trim()) {
-      // In a real app, this would call an API
+      dispatch(addReview({
+        bookId: book.id,
+        review: {
+          id: Date.now().toString(),
+          userId: user.email,
+          userName: user.name || user.email,
+          rating: newReview.rating,
+          comment: newReview.comment,
+          createdAt: new Date().toISOString(),
+        },
+      }));
       setSnackbarMessage('Review submitted successfully!');
       setSnackbarOpen(true);
       setNewReview({ rating: 5, comment: '' });
@@ -146,24 +153,19 @@ const BookDetail: React.FC = () => {
           <Typography variant="h5" color="text.secondary" sx={{ mb: 2 }}>
             by {book.author}
           </Typography>
-          
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <Rating value={book.rating} precision={0.5} readOnly />
             <Typography variant="body2" color="text.secondary">
-              ({book.rating}) • {book.reviewCount} reviews
+              ({book.rating}) • {reviews.length} reviews
             </Typography>
           </Box>
-
           <Chip label={book.category} color="primary" sx={{ mb: 2 }} />
-          
           <Typography variant="h4" color="error" sx={{ fontWeight: 700, mb: 3 }}>
             ${book.price.toFixed(2)}
           </Typography>
-
           <Typography variant="body1" sx={{ mb: 4, lineHeight: 1.6 }}>
             {book.description}
           </Typography>
-
           <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
             <Button
               variant="contained"
@@ -184,19 +186,17 @@ const BookDetail: React.FC = () => {
               {isFavorite ? <FavoriteIcon /> : <FavoriteBorderIcon />}
             </IconButton>
           </Box>
-
           <Typography variant="body2" color="text.secondary">
             Format: {book.format} • In Stock: {book.stock} copies
           </Typography>
         </Box>
       </Box>
 
-      {/* Reviews Section */}
+      {/* Customer Reviews Section */}
       <Paper sx={{ p: 4, mb: 6 }}>
         <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
           Customer Reviews
         </Typography>
-        
         {/* Add Review Form */}
         <Box sx={{ mb: 4, p: 3, bgcolor: 'background.paper', borderRadius: 2 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
@@ -227,13 +227,17 @@ const BookDetail: React.FC = () => {
             Submit Review
           </Button>
         </Box>
-
         {/* Reviews List */}
         <List>
-          {mockReviews.map((review) => (
+          {reviews.length === 0 && (
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              No reviews yet. Be the first to review this book!
+            </Typography>
+          )}
+          {reviews.map((review) => (
             <ListItem key={review.id} alignItems="flex-start" sx={{ mb: 2 }}>
               <ListItemAvatar>
-                <Avatar>{review.userName.charAt(0)}</Avatar>
+                <Avatar>{review.userName?.charAt(0) || '?'}</Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={
@@ -243,7 +247,7 @@ const BookDetail: React.FC = () => {
                     </Typography>
                     <Rating value={review.rating} size="small" readOnly />
                     <Typography variant="body2" color="text.secondary">
-                      {review.createdAt}
+                      {new Date(review.createdAt).toLocaleDateString()}
                     </Typography>
                   </Box>
                 }

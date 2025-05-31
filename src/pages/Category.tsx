@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import {
@@ -38,6 +38,7 @@ import {
 } from '@mui/icons-material';
 import { books as booksData } from '../data/books';
 import { addToCart } from '../store/slices/cartSlice';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const categoryDescriptions: Record<string, string> = {
   'Fiction': 'Immerse yourself in captivating stories, from literary classics to contemporary novels that explore the human experience.',
@@ -64,6 +65,7 @@ const Category: React.FC = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const decodedCategory = decodeURIComponent(category || '');
   const categoryBooks = booksData.filter(book => 
@@ -131,6 +133,16 @@ const Category: React.FC = () => {
     setPriceRange([0, 50]);
     setSortBy('featured');
   };
+
+  useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 1000); // Simulate loading
+    return () => clearTimeout(timer);
+  }, [searchQuery, priceRange, sortBy, category]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   if (categoryBooks.length === 0) {
     return (

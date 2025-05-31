@@ -33,6 +33,7 @@ import {
 } from '@mui/icons-material';
 import { books as booksData } from '../data/books';
 import { addToCart } from '../store/slices/cartSlice';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const SearchResults: React.FC = () => {
   const theme = useTheme();
@@ -45,6 +46,7 @@ const SearchResults: React.FC = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Update search params when search query changes
   React.useEffect(() => {
@@ -54,6 +56,12 @@ const SearchResults: React.FC = () => {
     }
     setSearchParams(params, { replace: true });
   }, [searchQuery, setSearchParams]);
+
+  React.useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 1000); // Simulate loading
+    return () => clearTimeout(timer);
+  }, [searchQuery, sortBy]);
 
   const filteredBooks = booksData.filter(book => {
     if (!searchQuery) return false;
@@ -124,6 +132,10 @@ const SearchResults: React.FC = () => {
       handleSearch();
     }
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>

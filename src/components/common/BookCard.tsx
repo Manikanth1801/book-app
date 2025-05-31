@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   Card,
   CardContent,
@@ -10,11 +10,16 @@ import {
   Box,
   Rating,
   Chip,
+  IconButton,
 } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { Book } from '../../types/mockTypes';
 import { addToCart } from '../../store/slices/cartSlice';
+import { addToWishlist, removeFromWishlist } from '../../store/slices/wishlistSlice';
+import { RootState } from '../../store';
 
 interface BookCardProps {
   book: Book;
@@ -23,6 +28,9 @@ interface BookCardProps {
 const BookCard: React.FC<BookCardProps> = ({ book }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.items);
+  const isInWishlist = wishlistItems.some((b) => b.id === book.id);
+  const [hovered, setHovered] = useState(false);
 
   const handleAddToCart = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -33,6 +41,15 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
     navigate(`/books/${book.id}`);
   };
 
+  const handleWishlistToggle = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(book.id));
+    } else {
+      dispatch(addToWishlist(book));
+    }
+  };
+
   return (
     <Card
       sx={{
@@ -40,19 +57,22 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
         display: 'flex',
         flexDirection: 'column',
         cursor: 'pointer',
+        position: 'relative',
         transition: 'transform 0.2s',
         '&:hover': {
           transform: 'scale(1.02)',
         },
       }}
       onClick={handleCardClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <Box sx={{ position: 'relative', paddingTop: '140%' }}>
-        <LazyLoadImage
-          src={book.coverImage || '/images/placeholder.jpg'}
+      <Box sx={{ position: 'relative', paddingTop: '100%', bgcolor: 'grey.200' }}>
+        <CardMedia
+          component="img"
+          image={book.coverImage || '/images/placeholder.jpg'}
           alt={book.title}
-          effect="blur"
-          style={{
+          sx={{
             position: 'absolute',
             top: 0,
             left: 0,
@@ -61,6 +81,43 @@ const BookCard: React.FC<BookCardProps> = ({ book }) => {
             objectFit: 'cover',
           }}
         />
+        <IconButton
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            bgcolor: 'background.paper',
+            '&:hover': { bgcolor: 'background.paper' },
+            zIndex: 2,
+          }}
+          onClick={handleWishlistToggle}
+        >
+          {isInWishlist ? <FavoriteIcon color="error" /> : <FavoriteBorderIcon />}
+        </IconButton>
+        {hovered && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              bgcolor: 'rgba(0,0,0,0.45)',
+              color: '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 3,
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: 1,
+              pointerEvents: 'none',
+              borderRadius: 2,
+            }}
+          >
+            Click for more details
+          </Box>
+        )}
       </Box>
       <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Typography gutterBottom variant="h6" component="h2" noWrap>

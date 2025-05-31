@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Book } from '../../types';
+import { Book } from '../../types/mockTypes';
 
 interface WishlistState {
   items: Book[];

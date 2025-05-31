@@ -35,6 +35,8 @@ import { books as booksData } from '../data/books';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/slices/cartSlice';
 import { useSearchParams } from 'react-router-dom';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import BookCard from '../components/common/BookCard';
 
 const Books: React.FC = () => {
   const theme = useTheme();
@@ -49,6 +51,7 @@ const Books: React.FC = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [loading, setLoading] = useState(true);
 
   // Update search params when search query changes
   React.useEffect(() => {
@@ -60,6 +63,12 @@ const Books: React.FC = () => {
     }
     setSearchParams(params, { replace: true });
   }, [searchQuery, searchParams, setSearchParams]);
+
+  React.useEffect(() => {
+    setLoading(true);
+    const timer = setTimeout(() => setLoading(false), 1000); // Simulate loading
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedCategory, priceRange, sortBy]);
 
   const categories = Array.from(new Set(booksData.map(book => book.category)));
 
@@ -125,6 +134,10 @@ const Books: React.FC = () => {
     setPriceRange([0, 50]);
     setSortBy('featured');
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
@@ -246,79 +259,7 @@ const Books: React.FC = () => {
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
         {sortedBooks.map((book) => (
           <Box key={book.id} sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-            <Card 
-              sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                flexDirection: 'column',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: theme.shadows[4],
-                },
-              }}
-            >
-              <Box sx={{ position: 'relative' }}>
-                <CardMedia
-                  component="img"
-                  height="300"
-                  image={book.image}
-                  alt={book.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-                <IconButton
-                  sx={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    bgcolor: 'background.paper',
-                    '&:hover': { bgcolor: 'background.paper' },
-                  }}
-                  onClick={() => toggleFavorite(book.id)}
-                >
-                  {favorites.includes(book.id) ? (
-                    <FavoriteIcon color="error" />
-                  ) : (
-                    <FavoriteBorderIcon />
-                  )}
-                </IconButton>
-              </Box>
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography gutterBottom variant="h6" component="h2" noWrap>
-                  {book.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  by {book.author}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Rating value={book.rating || 0} precision={0.5} readOnly size="small" />
-                  <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                    ({book.rating || 0})
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                  <Typography variant="h6" color="primary">
-                    ${book.price.toFixed(2)}
-                  </Typography>
-                  <Chip
-                    label={book.format}
-                    size="small"
-                    color={book.format === 'eBook' ? 'secondary' : 'primary'}
-                  />
-                </Box>
-              </CardContent>
-              <CardActions>
-                <Button 
-                  fullWidth 
-                  variant="contained" 
-                  color="primary"
-                  disabled={!book.inStock}
-                  onClick={() => handleAddToCart(book)}
-                >
-                  {book.inStock ? 'Add to Cart' : 'Out of Stock'}
-                </Button>
-              </CardActions>
-            </Card>
+            <BookCard book={book} />
           </Box>
         ))}
       </Box>
