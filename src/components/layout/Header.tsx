@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   AppBar,
   Toolbar,
@@ -16,19 +16,40 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
+  Menu,
+  MenuItem,
 } from '@mui/material';
-import { Menu as MenuIcon, ShoppingCart } from '@mui/icons-material';
+import { Menu as MenuIcon, ShoppingCart, Person, Logout } from '@mui/icons-material';
 import { RootState } from '../../store';
+import { logout } from '../../store/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const Header: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
   const { items } = useSelector((state: RootState) => state.cart);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    handleMenuClose();
+    navigate('/auth');
   };
 
   const navItems = [
@@ -59,7 +80,7 @@ const Header: React.FC = () => {
               to="/cart"
               onClick={handleDrawerToggle}
             >
-              <ListItemText primary="Cart" />
+              <ListItemText primary={`Cart (${items.length})`} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
@@ -69,6 +90,23 @@ const Header: React.FC = () => {
               onClick={handleDrawerToggle}
             >
               <ListItemText primary="Track Order" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              component={RouterLink}
+              to="/account"
+              onClick={handleDrawerToggle}
+            >
+              <ListItemText primary="My Account" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              handleLogout();
+              handleDrawerToggle();
+            }}>
+              <ListItemText primary="Logout" />
             </ListItemButton>
           </ListItem>
         </>
@@ -130,34 +168,72 @@ const Header: React.FC = () => {
               ))}
               {isAuthenticated ? (
                 <>
+                  <Button
+                    component={RouterLink}
+                    to="/track-order"
+                    color="inherit"
+                    sx={{ mr: 1 }}
+                  >
+                    Track Order
+                  </Button>
+                  <IconButton
+                    component={RouterLink}
+                    to="/cart"
+                    color="inherit"
+                    sx={{ mr: 1 }}
+                  >
+                    <Badge badgeContent={items.length} color="error">
+                      <ShoppingCart />
+                    </Badge>
+                  </IconButton>
+                  <IconButton
+                    color="inherit"
+                    onClick={handleMenuOpen}
+                    sx={{ ml: 1 }}
+                  >
+                    <Person />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                    onClick={handleMenuClose}
+                  >
+                    <MenuItem component={RouterLink} to="/account">
+                      My Account
+                    </MenuItem>
+                    <MenuItem onClick={handleLogout}>
+                      <Logout sx={{ mr: 1 }} /> Logout
+                    </MenuItem>
+                  </Menu>
                 </>
               ) : (
-                <>                 
-              <Button
-                component={RouterLink}
-                to="/track-order"
-                color="inherit"
-                sx={{ mr: 1 }}
-              >
-                Track Order
-              </Button>
-                <Button
-                  component={RouterLink}
-                  to="/auth"
-                  color="inherit"
-                  sx={{ mr: 1 }}
-                >
-                  Login
-                </Button>
-                <IconButton
-                component={RouterLink}
-                to="/cart"
-                color="inherit"
-              >
-                <Badge badgeContent={items.length} color="error">
-                  <ShoppingCart />
-                </Badge>
-              </IconButton>
+                <>
+                  <Button
+                    component={RouterLink}
+                    to="/track-order"
+                    color="inherit"
+                    sx={{ mr: 1 }}
+                  >
+                    Track Order
+                  </Button>
+                  <Button
+                    component={RouterLink}
+                    to="/auth"
+                    color="inherit"
+                    sx={{ mr: 1 }}
+                  >
+                    Login
+                  </Button>
+                  <IconButton
+                    component={RouterLink}
+                    to="/cart"
+                    color="inherit"
+                  >
+                    <Badge badgeContent={items.length} color="error">
+                      <ShoppingCart />
+                    </Badge>
+                  </IconButton>
                 </>
               )}
             </Box>
