@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import BookCard from '../../components/common/BookCard';
-import { mockBooks } from '../../data/mockData';
+import { books } from '../../data/books';
 
 export default function Home() {
   // For simplicity, displaying a few books on the home page
-  const booksToShow = mockBooks.slice(0, 4); // Display first 4 books
+  const booksToShow = books.slice(0, 4); // Display first 4 books
 
   return (
     <Box>
@@ -23,7 +23,7 @@ export default function Home() {
           },
         }}
       >
-        {booksToShow.map(book => (
+        {booksToShow.map((book:any) => (
           <Box key={book.id}>
             <BookCard book={book} />
           </Box>

@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { store } from './store';
 import AppRoutes from './routes';
 import MainLayout from './components/layout/MainLayout';
-import theme from './theme';
+import theme from './theme/index';
 
 // Create a client for React Query
 const queryClient = new QueryClient({

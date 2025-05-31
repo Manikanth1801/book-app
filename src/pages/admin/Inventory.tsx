@@ -28,10 +28,9 @@ import {
   Add as AddIcon,
 } from '@mui/icons-material';
 import { Book } from '../../types/mockTypes';
-import { mockBooks } from '../../data/mockData';
-
+import { books as booksData } from '../../data/books';
 const Inventory: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>(mockBooks);
+  const [books, setBooks] = useState<Book[]>(booksData);
   const [open, setOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [formData, setFormData] = useState<Book>({

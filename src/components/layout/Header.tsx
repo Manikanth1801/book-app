@@ -123,6 +123,7 @@ const Header: React.FC = () => {
                   component={RouterLink}
                   to={item.path}
                   color="inherit"
+                  sx={{ mr: 1 }}
                 >
                   {item.label}
                 </Button>
@@ -147,13 +148,33 @@ const Header: React.FC = () => {
                   </Button>
                 </>
               ) : (
+                <>                 
+              <Button
+                component={RouterLink}
+                to="/track-order"
+                color="inherit"
+                sx={{ mr: 1 }}
+              >
+                Track Order
+              </Button>
                 <Button
                   component={RouterLink}
                   to="/auth"
                   color="inherit"
+                  sx={{ mr: 1 }}
                 >
                   Login
                 </Button>
+                <IconButton
+                component={RouterLink}
+                to="/cart"
+                color="inherit"
+              >
+                <Badge badgeContent={items.length} color="error">
+                  <ShoppingCart />
+                </Badge>
+              </IconButton>
+                </>
               )}
             </Box>
           )}

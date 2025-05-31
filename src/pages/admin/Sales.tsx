@@ -29,7 +29,8 @@ import {
 } from '@mui/icons-material';
 import { Sale } from '../../types/mockTypes';
 import { Book } from '../../types';
-import { mockSales, mockBooks } from '../../data/mockData';
+import { mockSales } from '../../data/mockData';
+import { books as booksData } from '../../data/books';
 
 const Sales: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>(mockSales);
@@ -219,7 +220,7 @@ const Sales: React.FC = () => {
               }}
               label="Select Books"
             >
-              {mockBooks.map((book) => (
+              {booksData.map((book) => (
                 <MenuItem key={book.id} value={book.id}>
                   {book.title} - ${book.price}
                 </MenuItem>

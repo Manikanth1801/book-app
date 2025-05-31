@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import BookCard from '../../components/common/BookCard';
-import { mockBooks } from '../../data/mockData';
+import { books } from '../../data/books';
 
 export default function Books() {
   return (
@@ -19,7 +19,7 @@ export default function Books() {
           },
         }}
       >
-        {mockBooks.map(book => (
+        {books.map((book:any) => (
           <Box key={book.id}>
             <BookCard book={book} />
           </Box>

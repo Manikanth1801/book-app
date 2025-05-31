@@ -28,8 +28,8 @@ import {
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
 } from '@mui/icons-material';
-import { mockBooks } from '../data/mockData';
 import { Book } from '../types/mockTypes';
+import { books as booksData } from '../data/books';
 
 const Books: React.FC = () => {
   const theme = useTheme();
@@ -41,9 +41,9 @@ const Books: React.FC = () => {
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  const categories = Array.from(new Set(mockBooks.map(book => book.category)));
+  const categories = Array.from(new Set(booksData.map(book => book.category)));
 
-  const filteredBooks = mockBooks.filter(book => {
+  const filteredBooks = booksData.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          book.author.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = !selectedCategory || book.category === selectedCategory;
@@ -194,7 +194,7 @@ const Books: React.FC = () => {
                 <CardMedia
                   component="img"
                   height="300"
-                  image={book.coverImage}
+                  image={book.image}
                   alt={book.title}
                   sx={{ objectFit: 'cover' }}
                 />
