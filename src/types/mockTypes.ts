@@ -13,6 +13,7 @@ export interface Book {
   reviews?: Review[];
   inStock: boolean;
   format: 'eBook' | 'Paperback';
+  publishedDate: string;
 }
 
 export interface Review {

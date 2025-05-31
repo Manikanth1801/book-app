@@ -19,6 +19,11 @@ export interface Book {
   inStock: boolean;
   rating: number;
   reviews: Review[];
+  reviewCount: number;
+  isbn: string;
+  stock: number;
+  format: 'Paperback' | 'Hardcover' | 'eBook';
+  publishedDate: string;
 }
 
 export interface Review {

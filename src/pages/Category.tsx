@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import {
   Box,
   Typography,
@@ -20,7 +22,8 @@ import {
   Paper,
   IconButton,
   useTheme,
-  useMediaQuery,
+  Breadcrumbs,
+  Link,
   Snackbar,
   Alert,
 } from '@mui/material';
@@ -29,49 +32,51 @@ import {
   FilterList as FilterIcon,
   Favorite as FavoriteIcon,
   FavoriteBorder as FavoriteBorderIcon,
+  ArrowBack as ArrowBackIcon,
+  ShoppingCart as ShoppingCartIcon,
+  Home as HomeIcon,
 } from '@mui/icons-material';
-import { Book } from '../types/mockTypes';
 import { books as booksData } from '../data/books';
-import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/slices/cartSlice';
-import { useSearchParams } from 'react-router-dom';
 
-const Books: React.FC = () => {
+const categoryDescriptions: Record<string, string> = {
+  'Fiction': 'Immerse yourself in captivating stories, from literary classics to contemporary novels that explore the human experience.',
+  'Non-Fiction': 'Discover real-world insights, biographies, history, and educational content that inform and inspire.',
+  'Science Fiction': 'Explore futuristic worlds, space adventures, and imaginative technologies that push the boundaries of possibility.',
+  'Mystery': 'Solve puzzles and uncover secrets with thrilling detective stories and suspenseful page-turners.',
+  'Romance': 'Fall in love with heartwarming stories of passion, relationships, and happily-ever-afters.',
+  'Fantasy': 'Journey to magical realms filled with mythical creatures, epic quests, and supernatural adventures.',
+  'Biography': 'Learn from the lives of remarkable people who have shaped our world and left lasting legacies.',
+  'Self-Help': 'Transform your life with practical advice, personal development strategies, and motivational guidance.',
+  'Children': 'Delight young readers with age-appropriate stories that educate, entertain, and inspire imagination.',
+  'Teen & Young Adult': 'Connect with coming-of-age stories that resonate with teenage experiences and challenges.',
+};
+
+const Category: React.FC = () => {
+  const { category } = useParams<{ category: string }>();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [priceRange, setPriceRange] = useState<number[]>([0, 50]);
   const [sortBy, setSortBy] = useState<string>('featured');
-  const [showFilters, setShowFilters] = useState(!isMobile);
+  const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
-  // Update search params when search query changes
-  React.useEffect(() => {
-    const params = new URLSearchParams(searchParams);
-    if (searchQuery) {
-      params.set('search', searchQuery);
-    } else {
-      params.delete('search');
-    }
-    setSearchParams(params, { replace: true });
-  }, [searchQuery, searchParams, setSearchParams]);
+  const decodedCategory = decodeURIComponent(category || '');
+  const categoryBooks = booksData.filter(book => 
+    book.category.toLowerCase() === decodedCategory.toLowerCase()
+  );
 
-  const categories = Array.from(new Set(booksData.map(book => book.category)));
-
-  const filteredBooks = booksData.filter(book => {
+  const filteredBooks = categoryBooks.filter(book => {
     const matchesSearch = searchQuery === '' || 
                          book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         book.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          book.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = !selectedCategory || book.category === selectedCategory;
     const matchesPrice = book.price >= priceRange[0] && book.price <= priceRange[1];
-    return matchesSearch && matchesCategory && matchesPrice;
+    return matchesSearch && matchesPrice;
   });
 
   const sortedBooks = [...filteredBooks].sort((a, b) => {
@@ -84,6 +89,8 @@ const Books: React.FC = () => {
         return (b.rating || 0) - (a.rating || 0);
       case 'title':
         return a.title.localeCompare(b.title);
+      case 'newest':
+        return new Date(b.publishedDate || '').getTime() - new Date(a.publishedDate || '').getTime();
       default:
         return 0;
     }
@@ -121,32 +128,72 @@ const Books: React.FC = () => {
 
   const clearFilters = () => {
     setSearchQuery('');
-    setSelectedCategory('');
     setPriceRange([0, 50]);
     setSortBy('featured');
   };
 
+  if (categoryBooks.length === 0) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 8, textAlign: 'center' }}>
+        <Typography variant="h4" color="error" gutterBottom>
+          Category not found
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          The category "{decodedCategory}" doesn't exist or has no books.
+        </Typography>
+        <Button variant="contained" color="secondary" onClick={() => navigate('/books')}>
+          Browse All Books
+        </Button>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
+      {/* Breadcrumbs */}
+      <Breadcrumbs sx={{ mb: 3 }}>
+        <Link
+          component="button"
+          variant="body1"
+          onClick={() => navigate('/')}
+          sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+        >
+          <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+          Home
+        </Link>
+        <Link
+          component="button"
+          variant="body1"
+          onClick={() => navigate('/books')}
+          sx={{ textDecoration: 'none' }}
+        >
+          Books
+        </Link>
+        <Typography color="text.primary">{decodedCategory}</Typography>
+      </Breadcrumbs>
+
       {/* Header Section */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
-          Our Book Collection
+        <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 800 }}>
+          {decodedCategory}
+        </Typography>
+        <Typography variant="h6" color="text.secondary" sx={{ mb: 2, maxWidth: '800px' }}>
+          {categoryDescriptions[decodedCategory] || `Explore our collection of ${decodedCategory} books.`}
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
           {searchQuery ? 
-            `Search results for "${searchQuery}" (${sortedBooks.length} books found)` : 
-            `Discover your next favorite book from our carefully curated collection (${sortedBooks.length} books)`
+            `Search results in ${decodedCategory} for "${searchQuery}" (${sortedBooks.length} books found)` : 
+            `${sortedBooks.length} books in ${decodedCategory}`
           }
         </Typography>
         
         {/* Search and Filter Bar */}
-        <Paper sx={{ p: 2, mb: 3 }}>
+        <Paper sx={{ p: 2, mb: showFilters ? 2 : 3 }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
               <TextField
                 fullWidth
-                placeholder="Search by title, author, category, or description..."
+                placeholder={`Search in ${decodedCategory}...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 InputProps={{
@@ -167,6 +214,7 @@ const Books: React.FC = () => {
                   onChange={(e) => setSortBy(e.target.value)}
                 >
                   <MenuItem value="featured">Featured</MenuItem>
+                  <MenuItem value="newest">Newest First</MenuItem>
                   <MenuItem value="title">Title A-Z</MenuItem>
                   <MenuItem value="price-asc">Price: Low to High</MenuItem>
                   <MenuItem value="price-desc">Price: High to Low</MenuItem>
@@ -200,43 +248,22 @@ const Books: React.FC = () => {
         {/* Filters Section */}
         {showFilters && (
           <Paper sx={{ p: 2, mb: 3 }}>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-              <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Category
-                </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    displayEmpty
-                  >
-                    <MenuItem value="">All Categories</MenuItem>
-                    {categories.map((category) => (
-                      <MenuItem key={category} value={category}>
-                        {category}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              <Box sx={{ flex: '2 1 400px', minWidth: '300px' }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Price Range
-                </Typography>
-                <Slider
-                  value={priceRange}
-                  onChange={(_, newValue) => setPriceRange(newValue as number[])}
-                  valueLabelDisplay="auto"
-                  min={0}
-                  max={50}
-                  marks={[
-                    { value: 0, label: '$0' },
-                    { value: 25, label: '$25' },
-                    { value: 50, label: '$50' },
-                  ]}
-                />
-              </Box>
+            <Box sx={{ maxWidth: 500 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                Price Range
+              </Typography>
+              <Slider
+                value={priceRange}
+                onChange={(_, newValue) => setPriceRange(newValue as number[])}
+                valueLabelDisplay="auto"
+                min={0}
+                max={50}
+                marks={[
+                  { value: 0, label: '$0' },
+                  { value: 25, label: '$25' },
+                  { value: 50, label: '$50' },
+                ]}
+              />
             </Box>
           </Paper>
         )}
@@ -252,11 +279,13 @@ const Books: React.FC = () => {
                 display: 'flex', 
                 flexDirection: 'column',
                 transition: 'transform 0.2s',
+                cursor: 'pointer',
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: theme.shadows[4],
                 },
               }}
+              onClick={() => navigate(`/books/${book.id}`)}
             >
               <Box sx={{ position: 'relative' }}>
                 <CardMedia
@@ -274,7 +303,10 @@ const Books: React.FC = () => {
                     bgcolor: 'background.paper',
                     '&:hover': { bgcolor: 'background.paper' },
                   }}
-                  onClick={() => toggleFavorite(book.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleFavorite(book.id);
+                  }}
                 >
                   {favorites.includes(book.id) ? (
                     <FavoriteIcon color="error" />
@@ -297,7 +329,7 @@ const Books: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                  <Typography variant="h6" color="primary">
+                  <Typography variant="h6" color="error" sx={{ fontWeight: 700 }}>
                     ${book.price.toFixed(2)}
                   </Typography>
                   <Chip
@@ -311,9 +343,13 @@ const Books: React.FC = () => {
                 <Button 
                   fullWidth 
                   variant="contained" 
-                  color="primary"
+                  color="secondary"
                   disabled={!book.inStock}
-                  onClick={() => handleAddToCart(book)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(book);
+                  }}
+                  startIcon={<ShoppingCartIcon />}
                 >
                   {book.inStock ? 'Add to Cart' : 'Out of Stock'}
                 </Button>
@@ -327,15 +363,22 @@ const Books: React.FC = () => {
       {sortedBooks.length === 0 && (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h5" color="text.secondary">
-            No books found matching your criteria
+            No books found in {decodedCategory}
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
             Try adjusting your filters or search terms
           </Typography>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => navigate('/books')}
+          >
+            Browse All Books
+          </Button>
         </Box>
       )}
 
-      {/* Snackbar for feedback */}
+      {/* Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
@@ -350,4 +393,4 @@ const Books: React.FC = () => {
   );
 };
 
-export default Books; 
+export default Category; 

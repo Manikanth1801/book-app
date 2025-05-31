@@ -23,23 +23,45 @@ import {
   Search as SearchIcon,
 } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../store/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
 
 const AppBar: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const user = useSelector((state: any) => state.auth.user);
+  const cart = useSelector((state: any) => state.cart?.items || []);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  const menuItems = [
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/auth');
+  };
+
+  // Build menu items for nav bar
+  type MenuItem = { text: string; path: string; action?: () => void; icon?: React.ReactNode };
+  const baseMenuItems: MenuItem[] = [
     { text: 'Home', path: '/' },
     { text: 'Books', path: '/books' },
-    { text: 'Categories', path: '/categories' },
     { text: 'About', path: '/about' },
     { text: 'Contact', path: '/contact' },
   ];
+  const userMenuItems: MenuItem[] = [
+    { text: 'Track Order', path: '/track-order' },
+    { text: 'My Account', path: '/account' },
+    { text: 'Cart', path: '/cart', icon: <Badge badgeContent={cart.length || 0} color="secondary"><ShoppingCartIcon /></Badge> },
+    { text: 'Logout', path: '', action: handleLogout },
+  ];
+  const menuItems: MenuItem[] = user && user.role === 'user'
+    ? [...baseMenuItems, ...userMenuItems]
+    : baseMenuItems;
 
   const drawer = (
     <Box sx={{ width: 250 }} role="presentation" onClick={handleDrawerToggle}>
@@ -51,14 +73,31 @@ const AppBar: React.FC = () => {
         ))}
       </List>
       <Divider />
-      <List>
-        <ListItemButton component={RouterLink} to="/login">
-          <ListItemText primary="Login" />
-        </ListItemButton>
-        <ListItemButton component={RouterLink} to="/register">
-          <ListItemText primary="Register" />
-        </ListItemButton>
-      </List>
+      {user && user.role === 'user' ? (
+        <List>
+          <ListItemButton component={RouterLink} to="/account">
+            <ListItemText primary="My Account" />
+          </ListItemButton>
+          <ListItemButton component={RouterLink} to="/track-order">
+            <ListItemText primary="Track Order" />
+          </ListItemButton>
+          <ListItemButton component={RouterLink} to="/cart">
+            <ListItemText primary={`Cart (${cart.length || 0})`} />
+          </ListItemButton>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
+        </List>
+      ) : (
+        <List>
+          <ListItemButton component={RouterLink} to="/login">
+            <ListItemText primary="Login" />
+          </ListItemButton>
+          <ListItemButton component={RouterLink} to="/register">
+            <ListItemText primary="Register" />
+          </ListItemButton>
+        </List>
+      )}
     </Box>
   );
 
@@ -93,37 +132,40 @@ const AppBar: React.FC = () => {
             </Typography>
           </Box>
 
-          {!isMobile && (
-            <Box sx={{ display: 'flex', gap: 3 }}>
-              {menuItems.map((item) => (
-                <Button
-                  key={item.text}
-                  component={RouterLink}
-                  to={item.path}
-                  color="inherit"
-                  sx={{
-                    fontWeight: 500,
-                    '&:hover': {
-                      color: 'primary.main',
-                    },
-                  }}
-                >
-                  {item.text}
-                </Button>
-              ))}
-            </Box>
-          )}
-
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', justifyContent: 'flex-end' }}>
             <IconButton color="inherit" size="large">
               <SearchIcon />
             </IconButton>
-            <IconButton color="inherit" size="large">
-              <Badge badgeContent={0} color="secondary">
-                <ShoppingCartIcon />
-              </Badge>
-            </IconButton>
-            {!isMobile && (
+            {/* Main nav yellow buttons including user actions and cart */}
+            <Box sx={{ display: 'flex', gap: 2, ml: 4 }}>
+              {menuItems.map((item) =>
+                item.action ? (
+                  <Button
+                    key={item.text}
+                    onClick={item.action}
+                    variant="contained"
+                    color="secondary"
+                    sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    {item.icon}
+                    {item.text}
+                  </Button>
+                ) : (
+                  <Button
+                    key={item.text}
+                    component={RouterLink}
+                    to={item.path}
+                    variant="contained"
+                    color="secondary"
+                    sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}
+                  >
+                    {item.icon}
+                    {item.text}
+                  </Button>
+                )
+              )}
+            </Box>
+            {!user && (
               <Button
                 component={RouterLink}
                 to="/login"

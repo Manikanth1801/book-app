@@ -13,6 +13,11 @@ const Books = lazy(() => import('../pages/Books'));
 const About = lazy(() => import('../pages/About'));
 const Contact = lazy(() => import('../pages/Contact'));
 const TrackOrder = lazy(() => import('../pages/TrackOrder'));
+const Account = lazy(() => import('../pages/account'));
+const Checkout = lazy(() => import('../pages/Checkout'));
+const BookDetail = lazy(() => import('../pages/BookDetail'));
+const SearchResults = lazy(() => import('../pages/SearchResults'));
+const Category = lazy(() => import('../pages/Category'));
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,6 +36,9 @@ const AppRoutes: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/books" element={<Books />} />
+        <Route path="/books/:id" element={<BookDetail />} />
+        <Route path="/search" element={<SearchResults />} />
+        <Route path="/category/:category" element={<Category />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/auth" element={<Auth />} />
@@ -41,12 +49,27 @@ const AppRoutes: React.FC = () => {
         <Route
           path="/track-order"
           element={
-            <ProtectedRoute>
+//            <ProtectedRoute>
               <TrackOrder />
+//            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account"
+          element={
+            <ProtectedRoute>
+              <Account />
             </ProtectedRoute>
           }
         />
-        
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
         {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

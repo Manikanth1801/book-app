@@ -130,22 +130,6 @@ const Header: React.FC = () => {
               ))}
               {isAuthenticated ? (
                 <>
-                  <IconButton
-                    component={RouterLink}
-                    to="/cart"
-                    color="inherit"
-                  >
-                    <Badge badgeContent={items.length} color="error">
-                      <ShoppingCart />
-                    </Badge>
-                  </IconButton>
-                  <Button
-                    component={RouterLink}
-                    to="/track-order"
-                    color="inherit"
-                  >
-                    Track Order
-                  </Button>
                 </>
               ) : (
                 <>                 

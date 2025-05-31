@@ -66,6 +66,18 @@ const Auth: React.FC = () => {
         isAuthenticated: true
       }));
       navigate('/admin');
+    } else if (email === 'user@user.com' && password === '123456789') {
+      // Dispatch login action with user role
+      dispatch(login({
+        user: {
+          email: 'user@user.com',
+          role: 'user',
+          name: 'John Doe',
+          number: '+1 555-123-4567',
+        },
+        isAuthenticated: true
+      }));
+      navigate('/account');
     } else {
       setError('Invalid credentials');
     }
@@ -101,6 +113,12 @@ const Auth: React.FC = () => {
                 Temporary Admin Access:
                 <br />
                 Email: test@test.com
+                <br />
+                Password: 123456789
+                <br /><br />
+                Temporary User Access:
+                <br />
+                Email: user@user.com
                 <br />
                 Password: 123456789
               </Typography>

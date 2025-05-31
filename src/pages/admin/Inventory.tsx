@@ -48,6 +48,7 @@ const Inventory: React.FC = () => {
     rating: undefined,
     reviews: undefined,
     salePrice: undefined,
+    publishedDate: '',
   });
 
   const handleOpen = (book?: Book) => {
@@ -67,6 +68,7 @@ const Inventory: React.FC = () => {
       rating: undefined,
       reviews: undefined,
       salePrice: undefined,
+      publishedDate: '',
     });
     setOpen(true);
   };
@@ -89,6 +91,7 @@ const Inventory: React.FC = () => {
       rating: undefined,
       reviews: undefined,
       salePrice: undefined,
+      publishedDate: '',
     });
   };
 

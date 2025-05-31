@@ -14,6 +14,8 @@ export interface Book {
   isbn: string;
   stock: number;
   format: 'Paperback' | 'eBook';
+  publishedDate: string;
+  coverImage?: string;
 }
 
 export const books: Book[] = [
@@ -31,6 +33,8 @@ export const books: Book[] = [
     isbn: '978-0743273565',
     stock: 10,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '2',
@@ -46,6 +50,8 @@ export const books: Book[] = [
     isbn: '978-0446310789',
     stock: 8,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '3',
@@ -61,6 +67,8 @@ export const books: Book[] = [
     isbn: '978-0451524935',
     stock: 5,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '4',
@@ -76,6 +84,8 @@ export const books: Book[] = [
     isbn: '978-0141439518',
     stock: 7,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '5',
@@ -91,6 +101,8 @@ export const books: Book[] = [
     isbn: '978-0395071225',
     stock: 3,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '6',
@@ -106,6 +118,8 @@ export const books: Book[] = [
     isbn: '978-0316769488',
     stock: 6,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '7',
@@ -121,6 +135,8 @@ export const books: Book[] = [
     isbn: '978-0062326998',
     stock: 4,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '8',
@@ -136,6 +152,8 @@ export const books: Book[] = [
     isbn: '978-0142410360',
     stock: 2,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '9',
@@ -151,6 +169,8 @@ export const books: Book[] = [
     isbn: '978-0307474278',
     stock: 1,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '10',
@@ -166,6 +186,8 @@ export const books: Book[] = [
     isbn: '978-1594480000',
     stock: 5,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '11',
@@ -181,6 +203,8 @@ export const books: Book[] = [
     isbn: '978-0375842207',
     stock: 3,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1455885664032-7c937c0d3a19?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '12',
@@ -196,6 +220,8 @@ export const books: Book[] = [
     isbn: '978-0060850524',
     stock: 2,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1463320898484-cdee8141c787?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '13',
@@ -211,6 +237,8 @@ export const books: Book[] = [
     isbn: '978-0142410339',
     stock: 4,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1455885664032-7c937c0d3a19?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '14',
@@ -226,6 +254,8 @@ export const books: Book[] = [
     isbn: '978-0439023481',
     stock: 1,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
   },
   {
     id: '15',
@@ -241,5 +271,7 @@ export const books: Book[] = [
     isbn: '978-0451208668',
     stock: 3,
     format: 'Paperback',
+    publishedDate: '2024-01-01',
+    coverImage: 'https://images.unsplash.com/photo-1455885664032-7c937c0d3a19?auto=format&fit=crop&w=400&q=80',
   },
 ]; 

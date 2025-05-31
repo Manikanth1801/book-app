@@ -12,10 +12,39 @@ import {
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { books } from '../data/books';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../store/slices/cartSlice';
+import { Snackbar, Alert, IconButton } from '@mui/material';
+import { ShoppingCart as ShoppingCartIcon } from '@mui/icons-material';
 
 const Home: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const dispatch = useDispatch();
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState('');
+
+  const handleAddToCart = (book: any) => {
+    const cartItem = {
+      bookId: book.id,
+      quantity: 1,
+      book: {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        description: book.description,
+        price: book.price,
+        coverImage: book.image,
+        category: book.category,
+        inStock: book.inStock,
+        rating: book.rating,
+        reviews: []
+      }
+    };
+    dispatch(addToCart(cartItem));
+    setSnackbarMessage(`"${book.title}" added to cart!`);
+    setSnackbarOpen(true);
+  };
 
   return (
     <Box>
@@ -173,10 +202,25 @@ const Home: React.FC = () => {
                 <Typography
                   variant="h6"
                   color="error"
-                  sx={{ fontWeight: 700 }}
+                  sx={{ fontWeight: 700, mb: 2 }}
                 >
                   ${book.price.toFixed(2)}
                 </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    size="small"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAddToCart(book);
+                    }}
+                    disabled={!book.inStock}
+                    startIcon={<ShoppingCartIcon />}
+                  >
+                    {book.inStock ? 'Add to Cart' : 'Out of Stock'}
+                  </Button>
+                </Box>
               </CardContent>
             </Card>
           ))}
@@ -250,6 +294,18 @@ const Home: React.FC = () => {
           </Box>
         </Container>
       </Box>
+
+      {/* Snackbar for feedback */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success">
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
